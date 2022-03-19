@@ -1,11 +1,14 @@
 # South Seven Technical School(SSTS)健康打卡平台自动打卡脚本 可用github action
 
+Forked form [here](https://github.com/pipixia244/South_Seven-AutoReport)
+
 ## 说明
 
 **本打卡脚本仅供学习交流使用，请勿过分依赖。 开发者对使用或不使用本脚本造成的问题不负任何责任，不对脚本执行效果做出任何担保，原则上不提供任何形式的技术支持。**
 
 ## 更新记录
 - 新增：
+  - 20210319 先打卡再报备/打卡使用新字段'juzhudi'
   - 20210917：增加自动检测并报备<出校报备>功能.
   - 20210821：使用pytesseract识别登录二维码，支持二维码验证登录打卡。
   - 20210818：适配新的打卡数据, 将新增的敏感信息以参数方式传递, 放入secrets中。
