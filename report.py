@@ -1,4 +1,5 @@
 # encoding=utf8
+from cgitb import html
 import requests
 import json
 import time
@@ -41,48 +42,13 @@ class Report(object):
         if not loginsuccess:
             return False
 
-        # 自动出校报备
-        ret = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i")
-        #print(ret.status_code)
-        #print(ret.url)
-        if (ret.status_code == 200):
-        	#每日报备
-        	print("开始例行报备.")
-        	data = ret.text
-        	data = data.encode('ascii','ignore').decode('utf-8','ignore')
-        	soup = BeautifulSoup(data, 'html.parser')
-        	token2 = soup.find("input", {"name": "_token"})['value']
-        	start_date = soup.find("input", {"id": "start_date"})['value']
-        	end_date = soup.find("input", {"id": "end_date"})['value']
-        	
-        	print("{}---{}".format(start_date, end_date))
-
-        	REPORT_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
-        	REPORT_DATA = {
-        		'_token': token2,
-        		'start_date': start_date,
-        		'end_date': end_date
-        	}
-
-        	ret = session.post(url=REPORT_URL, data=REPORT_DATA)
-       		print(ret.status_code)
-            #print(ret.text)
-
-        elif(ret.status_code == 302):
-        	print("你这周已经报备过了.")
-        	#老页面的判定, 新页面已经不需要
-        else:
-        	print("error! code "+ret.status_code)
-        	#出错
-
-
 
         data = getform.text
         data = data.encode('ascii','ignore').decode('utf-8','ignore')
         soup = BeautifulSoup(data, 'html.parser')
         token = soup.find("input", {"name": "_token"})['value']
 
-        with open(self.data_path, "r+") as f:
+        with open(self.data_path, "r+", encoding='UTF-8') as f:
             data = f.read()
             data = json.loads(data)
             data["jinji_lxr"]=self.emer_person
@@ -138,6 +104,45 @@ class Report(object):
             print("Report FAILED!")
         else:
             print("Report SUCCESSFUL!")
+
+
+
+        # 自动出校报备
+        ret = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i")
+        print(ret.status_code)
+        print(ret.url)
+        if (ret.status_code == 200):
+            #每日报备
+            print("开始例行报备.")
+            data = ret.text
+            # print("data")
+            # print(data)
+            data = data.encode('ascii','ignore').decode('utf-8','ignore')
+            soup = BeautifulSoup(data, 'html.parser')
+            token2 = soup.find("input", {"name": "_token"})['value']
+            start_date = soup.find("input", {"id": "start_date"})['value']
+            end_date = soup.find("input", {"id": "end_date"})['value']
+            
+            print("{}---{}".format(start_date, end_date))
+
+            REPORT_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+            REPORT_DATA = {
+                '_token': token2,
+                'start_date': start_date,
+                'end_date': end_date
+            }
+
+            ret = session.post(url=REPORT_URL, data=REPORT_DATA)
+            print(ret.status_code)
+            #print(ret.text)
+
+        elif(ret.status_code == 302):
+            print("你这周已经报备过了.")
+            #老页面的判定, 新页面已经不需要
+        else:
+            print("error! code "+ret.status_code)
+            #出错
+                    
         return flag
 
     def login(self):
