@@ -1,5 +1,4 @@
 # encoding=utf8
-from cgitb import html
 import requests
 import json
 import time
@@ -42,13 +41,12 @@ class Report(object):
         if not loginsuccess:
             return False
 
-
         data = getform.text
         data = data.encode('ascii','ignore').decode('utf-8','ignore')
         soup = BeautifulSoup(data, 'html.parser')
         token = soup.find("input", {"name": "_token"})['value']
 
-        with open(self.data_path, "r+", encoding='UTF-8') as f:
+        with open(self.data_path, "r+") as f:
             data = f.read()
             data = json.loads(data)
             data["jinji_lxr"]=self.emer_person
@@ -102,21 +100,19 @@ class Report(object):
                 print("{} second(s) before.".format(delta_nega.seconds))
         if flag == False:
             print("Report FAILED!")
+            print("健康打卡失败, 取消例行报备!")
+            return flag
         else:
             print("Report SUCCESSFUL!")
-
-
-
+        
         # 自动出校报备
         ret = session.get("https://weixine.ustc.edu.cn/2020/apply/daliy/i")
-        print(ret.status_code)
-        print(ret.url)
+        #print(ret.status_code)
+        #print(ret.url)
         if (ret.status_code == 200):
             #每日报备
             print("开始例行报备.")
             data = ret.text
-            # print("data")
-            # print(data)
             data = data.encode('ascii','ignore').decode('utf-8','ignore')
             soup = BeautifulSoup(data, 'html.parser')
             token2 = soup.find("input", {"name": "_token"})['value']
@@ -126,10 +122,13 @@ class Report(object):
             print("{}---{}".format(start_date, end_date))
 
             REPORT_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+            RETURN_COLLEGE = {'东校区', '西校区', '中校区', '南校区', '北校区'}
             REPORT_DATA = {
                 '_token': token2,
                 'start_date': start_date,
-                'end_date': end_date
+                'end_date': end_date,
+                'return_college[]': RETURN_COLLEGE,
+                't': 3,
             }
 
             ret = session.post(url=REPORT_URL, data=REPORT_DATA)
@@ -142,8 +141,9 @@ class Report(object):
         else:
             print("error! code "+ret.status_code)
             #出错
-                    
-        return flag
+            return False
+        return True
+
 
     def login(self):
         retries = Retry(total=5,
